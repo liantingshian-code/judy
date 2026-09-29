@@ -1,1 +1,52 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>全台展覽快速查詢</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; line-height: 1.6; }
+        .card { border: 1px solid #ccc; padding: 15px; margin: 10px 0; border-radius: 8px; box-shadow: 2px 2px 5px #eee; }
+        .tag { background: #007bff; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.8em; }
+        input { padding: 10px; width: 100%; max-width: 300px; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <h1>全台展覽活動查詢</h1>
+    <input type="text" id="searchInput" placeholder="搜尋展覽名稱或類別..." onkeyup="filterData()">
+    <div id="eventList">載入中...</div>
 
+    <script>
+        // 從 data.json 讀取資料
+        fetch('data.json')
+            .then(response => response.json())
+            .then(data => {
+                window.events = data;
+                render(data);
+            })
+            .catch(err => {
+                document.getElementById('eventList').innerHTML = "讀取資料失敗，請確認 data.json 格式是否正確。";
+            });
+
+        function render(data) {
+            const list = document.getElementById('eventList');
+            if(data.length === 0) { list.innerHTML = "找不到相關活動"; return; }
+            list.innerHTML = data.map(e => `
+                <div class="card">
+                    <h3>${e.name}</h3>
+                    <p>📅 ${e.date} | 💰 ${e.price}</p>
+                    <span class="tag">${e.category}</span>
+                </div>
+            `).join('');
+        }
+
+        function filterData() {
+            const val = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = window.events.filter(e => 
+                e.category.toLowerCase().includes(val) || 
+                e.name.toLowerCase().includes(val)
+            );
+            render(filtered);
+        }
+    </script>
+</body>
+</html>
